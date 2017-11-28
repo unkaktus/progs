@@ -33,6 +33,7 @@ func GoBuild(tempDir string) error {
 		goos = o
 	}
 	cmd.Env = append(os.Environ(), "GOOS="+goos)
+	cmd.Env = append(cmd.Env, "CGO_ENABLED=0")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
