@@ -9,6 +9,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -40,10 +41,11 @@ func GoBuild(tempDir string) error {
 
 }
 
-const MinimalDockerfile = "FROM scratch\nCOPY app /\nCMD [\"/app\"]"
+const MinimalDockerfileFormat = "FROM %s\nCOPY app /\nCMD [\"/app\"]"
 
-func WriteMinimalDockerfile(tmpDir string) error {
+func WriteMinimalDockerfile(tmpDir, baseImage string) error {
 	dockerfilePath := filepath.Join(tmpDir, "Dockerfile")
+	MinimalDockerfile := fmt.Sprintf(MinimalDockerfileFormat, baseImage)
 	return ioutil.WriteFile(dockerfilePath, []byte(MinimalDockerfile), 0400)
 }
 
@@ -64,7 +66,8 @@ func DockerPush(image, tag string) error {
 }
 
 func main() {
-	var baseImage = flag.String("b", "", "image name")
+	var baseImage = flag.String("b", "scratch", "image name")
+	var imageName = flag.String("n", "", "image name")
 	var tagFlag = flag.String("t", "", "image tag")
 	var push = flag.Bool("p", false, "push image")
 	flag.Parse()
@@ -94,16 +97,16 @@ func main() {
 		log.Fatalf("go build failed: %v", err)
 	}
 
-	if err := WriteMinimalDockerfile(tempDir); err != nil {
+	if err := WriteMinimalDockerfile(tempDir, *baseImage); err != nil {
 		log.Fatalf("unable to write Dockerfile: %v", err)
 	}
 
-	if err := DockerBuild(*baseImage, tag, tempDir); err != nil {
+	if err := DockerBuild(*imageName, tag, tempDir); err != nil {
 		log.Fatalf("docker build failed: %v", err)
 	}
 
 	if *push {
-		if err := DockerPush(*baseImage, tag); err != nil {
+		if err := DockerPush(*imageName, tag); err != nil {
 			log.Fatal("docker push failed: %v", err)
 		}
 	}
