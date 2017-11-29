@@ -65,16 +65,23 @@ func DockerPush(image, tag string) error {
 
 func main() {
 	var baseImage = flag.String("b", "", "image name")
+	var tagFlag = flag.String("t", "", "image tag")
 	var push = flag.Bool("p", false, "push image")
 	flag.Parse()
 	if *baseImage == "" {
 		log.Fatalf("no image name specified")
 	}
-	tag, err := GitCurrentTag()
-	if err != nil {
-		log.Fatalf("unable to get git current tag: %v", err)
+	var tag string
+	if *tagFlag == "" {
+		var err error
+		tag, err = GitCurrentTag()
+		if err != nil {
+			log.Fatalf("unable to get git current tag: %v", err)
+		}
+	} else {
+		tag = *tagFlag
 	}
-	log.Printf("tag: %v", tag)
+	log.Printf("using tag: %v", tag)
 
 	tempDir, err := ioutil.TempDir("", "bundle")
 	if err != nil {
