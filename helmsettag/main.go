@@ -39,10 +39,13 @@ func ReleaseNameByChartName(chartName string, namespace string) (string, error) 
 	return "", errors.New("no release of this chart")
 }
 
-func SetReleaseImageTag(chartName, releaseName, imageTag string, wait bool) error {
+func SetReleaseImageTag(chartName, releaseName, imageTag string, wait, force bool) error {
 	args := []string{"upgrade", "--reuse-values", "--set", "image.tag=" + imageTag, releaseName, chartName}
 	if wait {
 		args = append(args, "--wait")
+	}
+	if force {
+		args = append(args, "--force")
 	}
 	out, err := exec.Command("helm", args...).CombinedOutput()
 	if err != nil {
@@ -55,6 +58,7 @@ func SetReleaseImageTag(chartName, releaseName, imageTag string, wait bool) erro
 func main() {
 	log.SetFlags(0)
 	var wait = flag.Bool("wait", false, "wait release to finish its rollout")
+	var force = flag.Bool("force", false, "use --force")
 	var namespace = flag.String("namespace", "", "namespace to look releases in")
 	flag.Parse()
 	switch len(flag.Args()) {
@@ -74,7 +78,7 @@ func main() {
 		log.Fatal(err)
 	}
 	log.Printf("upgrading '%s'", releaseName)
-	if err := SetReleaseImageTag(chartName, releaseName, imageTag, *wait); err != nil {
+	if err := SetReleaseImageTag(chartName, releaseName, imageTag, *wait, *force); err != nil {
 		log.Fatal(err)
 	}
 }
