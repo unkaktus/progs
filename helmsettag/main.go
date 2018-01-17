@@ -11,8 +11,13 @@ import (
 	"strings"
 )
 
-func ReleaseNameByChartName(chartName string) (string, error) {
-	out, err := exec.Command("helm", "list", "--deployed").CombinedOutput()
+func ReleaseNameByChartName(chartName string, namespace string) (string, error) {
+	args := []string{"list", "--deployed"}
+	if namespace != "" {
+		args = append(args, []string{"--namespace", namespace}...)
+	}
+
+	out, err := exec.Command("helm", args...).CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("%s", out)
 	}
@@ -50,6 +55,7 @@ func SetReleaseImageTag(chartName, releaseName, imageTag string, wait bool) erro
 func main() {
 	log.SetFlags(0)
 	var wait = flag.Bool("wait", false, "wait release to finish its rollout")
+	var namespace = flag.String("namespace", "", "namespace to look releases in")
 	flag.Parse()
 	switch len(flag.Args()) {
 	case 0:
@@ -63,7 +69,7 @@ func main() {
 	}
 	chartName := flag.Args()[0]
 	imageTag := flag.Args()[1]
-	releaseName, err := ReleaseNameByChartName(chartName)
+	releaseName, err := ReleaseNameByChartName(chartName, *namespace)
 	if err != nil {
 		log.Fatal(err)
 	}
