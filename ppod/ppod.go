@@ -12,6 +12,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -53,6 +54,8 @@ func GetForwardAddress(r io.Reader) (string, error) {
 func main() {
 	log.SetFlags(0)
 	var port = flag.String("p", "6060", "pod port")
+	var profile = flag.String("profile", "", "profile duration (30s default)")
+	var trace = flag.String("trace", "", "trace duration (30s default)")
 	flag.Parse()
 
 	if len(flag.Args()) != 1 {
@@ -66,40 +69,54 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	go func() {
-		err := cmd.Run()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
+	stderrPipe, err := cmd.StderrPipe()
+	if err != nil {
+		log.Fatal(err)
+	}
+	go cmd.Run()
 
 	addr, err := GetForwardAddress(stdoutPipe)
 	if err != nil {
-		log.Fatal(err)
+		stderr, _ := ioutil.ReadAll(stderrPipe)
+		log.Fatalf("%s", stderr)
 	}
 
-	log.Printf("addr: %s", addr)
-
-	profileFile, err := os.Create(podname + ".profile")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer profileFile.Close()
-	log.Print("fetching profile...")
-	err = FetchProfile(profileFile, addr, 30*time.Second)
-	if err != nil {
-		log.Fatal(err)
+	if *profile == "" && *trace == "" {
+		*profile = "30s"
+		*trace = "30s"
 	}
 
-	traceFile, err := os.Create(podname + ".trace")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer traceFile.Close()
-	log.Print("fetching trace...")
-	err = FetchTrace(traceFile, addr, 30*time.Second)
-	if err != nil {
-		log.Fatal(err)
+	if *profile != "" {
+		profileDuration, err := time.ParseDuration(*profile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		profileFile, err := os.Create(podname + ".profile")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer profileFile.Close()
+		log.Printf("fetching profile to %s", profileFile.Name())
+		err = FetchProfile(profileFile, addr, profileDuration)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
+	if *trace != "" {
+		traceDuration, err := time.ParseDuration(*trace)
+		if err != nil {
+			log.Fatal(err)
+		}
+		traceFile, err := os.Create(podname + ".trace")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer traceFile.Close()
+		log.Printf("fetching trace to %s", traceFile.Name())
+		err = FetchTrace(traceFile, addr, traceDuration)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
