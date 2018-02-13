@@ -8,17 +8,16 @@
 package main
 
 import (
-	"bufio"
+	"context"
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
-	"strings"
 	"time"
+
+	"github.com/nogoegst/progs/pkg/kubernetes/portforward"
 )
 
 func FetchProfile(w io.Writer, addr string, d time.Duration) error {
@@ -41,16 +40,6 @@ func FetchTrace(w io.Writer, addr string, d time.Duration) error {
 	return err
 }
 
-func GetForwardAddress(r io.Reader) (string, error) {
-	s, err := bufio.NewReader(r).ReadString('\n')
-	if err != nil {
-		return "", err
-	}
-	s = strings.TrimPrefix(s, "Forwarding from ")
-	sp := strings.Split(s, " -> ")
-	return sp[0], nil
-}
-
 func main() {
 	log.SetFlags(0)
 	var port = flag.String("p", "6060", "pod port")
@@ -64,22 +53,12 @@ func main() {
 
 	podname := flag.Args()[0]
 
-	cmd := exec.Command("kubectl", "port-forward", podname, ":"+*port)
-	stdoutPipe, err := cmd.StdoutPipe()
+	ctx := context.Background()
+	pfw, err := portforward.NewPortForward(ctx, podname, *port)
 	if err != nil {
 		log.Fatal(err)
 	}
-	stderrPipe, err := cmd.StderrPipe()
-	if err != nil {
-		log.Fatal(err)
-	}
-	go cmd.Run()
-
-	addr, err := GetForwardAddress(stdoutPipe)
-	if err != nil {
-		stderr, _ := ioutil.ReadAll(stderrPipe)
-		log.Fatalf("%s", stderr)
-	}
+	defer pfw.Close()
 
 	if *profile == "" && *trace == "" {
 		*profile = "30s"
@@ -97,7 +76,7 @@ func main() {
 		}
 		defer profileFile.Close()
 		log.Printf("fetching profile to %s", profileFile.Name())
-		err = FetchProfile(profileFile, addr, profileDuration)
+		err = FetchProfile(profileFile, pfw.Addr(), profileDuration)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -114,7 +93,7 @@ func main() {
 		}
 		defer traceFile.Close()
 		log.Printf("fetching trace to %s", traceFile.Name())
-		err = FetchTrace(traceFile, addr, traceDuration)
+		err = FetchTrace(traceFile, pfw.Addr(), traceDuration)
 		if err != nil {
 			log.Fatal(err)
 		}
