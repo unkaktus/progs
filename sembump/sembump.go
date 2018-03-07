@@ -81,6 +81,9 @@ func main() {
 		v = version.IncMinor()
 	case *patchFlag:
 		v = version.IncPatch()
+		if version.Prerelease() != "" {
+			v = v.IncPatch()
+		}
 	}
 	tag = "v" + v.String()
 	log.Printf("tagging with %s", tag)
