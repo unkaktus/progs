@@ -21,5 +21,5 @@ but why?
 | `nodepod` | looks up full Kubernetes pod name by prefix and node |
 | `ppod` | fetches CPU profile and trace of Go app by podname it is running in |
 | `redir` | spins up an http server that redirects to provided url |
-| `sembump` | makes git tag sembump a no-brainer |
+| `sembump` | makes git tag semver bumping a no-brainer |
 | `whatonion` | calculates onion address from private key file |
