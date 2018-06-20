@@ -13,6 +13,7 @@ but why?
 | ---- | ----------- |
 | `bundle` | builds Go application, puts it into Docker image, and pushes it to the registry |
 | `chrome-tmp` | starts chrome in Incognito mode with ephemeral profile |
+| `frontprobe` | quickly probe domain fronting availability |
 | `helmsettag` | finds a Helm release by name and sets its image tag to the desired one |
 | `kubecred` | simplified certificate signing process on Kubernetes cluster |
 | `kubectx` | makes kubectl context switching faster |
