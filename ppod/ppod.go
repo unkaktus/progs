@@ -45,6 +45,7 @@ func main() {
 	var port = flag.String("p", "6060", "pod port")
 	var profile = flag.String("profile", "", "profile duration (30s default)")
 	var trace = flag.String("trace", "", "trace duration (30s default)")
+	var raw = flag.Bool("raw", false, "profile app over direct address and not by pod name")
 	flag.Parse()
 
 	if len(flag.Args()) != 1 {
@@ -52,13 +53,19 @@ func main() {
 	}
 
 	podname := flag.Args()[0]
-
-	ctx := context.Background()
-	pfw, err := portforward.NewPortForward(ctx, podname, *port)
-	if err != nil {
-		log.Fatal(err)
+	var addr string
+	if *raw {
+		addr = podname
+		podname = "raw"
+	} else {
+		ctx := context.Background()
+		pfw, err := portforward.NewPortForward(ctx, podname, *port)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer pfw.Close()
+		addr = pfw.Addr()
 	}
-	defer pfw.Close()
 
 	if *profile == "" && *trace == "" {
 		*profile = "30s"
@@ -76,7 +83,7 @@ func main() {
 		}
 		defer profileFile.Close()
 		log.Printf("fetching profile to %s", profileFile.Name())
-		err = FetchProfile(profileFile, pfw.Addr(), profileDuration)
+		err = FetchProfile(profileFile, addr, profileDuration)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -93,7 +100,7 @@ func main() {
 		}
 		defer traceFile.Close()
 		log.Printf("fetching trace to %s", traceFile.Name())
-		err = FetchTrace(traceFile, pfw.Addr(), traceDuration)
+		err = FetchTrace(traceFile, addr, traceDuration)
 		if err != nil {
 			log.Fatal(err)
 		}
