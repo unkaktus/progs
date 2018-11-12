@@ -8,11 +8,13 @@
 package main
 
 import (
-	"crypto/tls"
 	"flag"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
+
+	"github.com/nogoegst/frontier"
 )
 
 func main() {
@@ -22,19 +24,20 @@ func main() {
 	var front = flag.String("n", "", "SNI")
 	var hostHeader = flag.String("h", "", "Host header")
 	var path = flag.String("p", "/", "path")
+	var method = flag.String("m", http.MethodGet, "method")
 	flag.Parse()
 
-	req, err := http.NewRequest(http.MethodGet, "https://"+*hostname+*path, nil)
+	fr := frontier.New(http.DefaultTransport, *front, *hostname)
+	u := &url.URL{
+		Scheme: "https",
+		Host:   *hostHeader,
+		Path:   *path,
+	}
+	req, err := http.NewRequest(*method, u.String(), http.NoBody)
 	if err != nil {
 		log.Fatal(err)
 	}
-	req.Host = *hostHeader
-	t := http.DefaultTransport.(*http.Transport)
-	t.TLSClientConfig = &tls.Config{
-		ServerName:         *front,
-		InsecureSkipVerify: true,
-	}
-	resp, err := t.RoundTrip(req)
+	resp, err := fr.RoundTrip(req)
 	if err != nil {
 		log.Fatal(err)
 	}
