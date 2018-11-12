@@ -13,6 +13,7 @@ but why?
 | ---- | ----------- |
 | `bundle` | builds Go application, puts it into Docker image, and pushes it to the registry |
 | `chrome-tmp` | starts chrome in Incognito mode with ephemeral profile |
+| `dockmach` | run `docker` via docker-machine without configuring envrironment for each terminal |
 | `frontprobe` | quickly probe domain fronting availability |
 | `goplay` | run a local .go file in Go Playground |
 | `helmsettag` | finds a Helm release by name and sets its image tag to the desired one |
