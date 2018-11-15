@@ -25,9 +25,6 @@ import (
 )
 
 func main() {
-	if os.Args[0] != "docker" {
-		log.Fatal("I wasn't called as `docker`")
-	}
 	machineBin, err := ioutil.ReadFile(filepath.Join(os.Getenv("HOME"), ".docker/machine/current"))
 	if err != nil {
 		log.Fatal(err)
