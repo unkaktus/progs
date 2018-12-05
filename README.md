@@ -15,6 +15,7 @@ but why?
 | `chrome-tmp` | starts chrome in Incognito mode with ephemeral profile |
 | `dockmach` | run `docker` via docker-machine without configuring envrironment for each terminal |
 | `frontprobe` | quickly probe domain fronting availability |
+| `getsignal` | fetch latest Signal APK |
 | `goplay` | run a local .go file in Go Playground |
 | `helmsettag` | finds a Helm release by name and sets its image tag to the desired one |
 | `kubecred` | simplified certificate signing process on Kubernetes cluster |
