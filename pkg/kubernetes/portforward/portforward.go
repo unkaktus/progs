@@ -38,9 +38,11 @@ func (pfw *portForwarder) Addr() string {
 	return pfw.addr
 }
 
-func NewPortForward(ctx context.Context, podname, port string) (*portForwarder, error) {
+func NewPortForward(ctx context.Context, podname, port string, opts ...string) (*portForwarder, error) {
 	ctx, cancel := context.WithCancel(ctx)
-	cmd := exec.CommandContext(ctx, "kubectl", "port-forward", podname, ":"+port)
+	kubectlArgs := append([]string{"port-forward", podname, ":" + port}, opts...)
+
+	cmd := exec.CommandContext(ctx, "kubectl", kubectlArgs...)
 	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {
 		return nil, err
