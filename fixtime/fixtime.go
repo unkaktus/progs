@@ -39,11 +39,11 @@ func readRTC() (int64, error) {
 
 func main() {
 	var intervalFlag = flag.String("i", "1s", "interval")
+	flag.Parse()
 	interval, err := time.ParseDuration(*intervalFlag)
 	if err != nil {
 		log.Fatal(err)
 	}
-	flag.Parse()
 	for {
 		s, err := readRTC()
 		if err != nil {
