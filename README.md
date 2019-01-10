@@ -28,3 +28,4 @@ but why?
 | `redir` | spins up an http server that redirects to provided url |
 | `sembump` | makes git tag semver bumping a no-brainer |
 | `whatonion` | calculates onion address from private key file |
+| `ytlookup` | get top hit YouTube search results as videoIDs |
