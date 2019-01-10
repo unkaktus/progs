@@ -22,11 +22,7 @@ import (
 	"github.com/savaki/jq"
 )
 
-func main() {
-	var n = flag.Int("n", 1, "max number of ids to return")
-	flag.Parse()
-	query := strings.Join(flag.Args(), " ")
-
+func search(query string) ([]string, error) {
 	u, _ := url.Parse("https://www.youtube.com/results?pbj=1")
 	v := u.Query()
 	v.Set("search_query", query)
@@ -34,25 +30,25 @@ func main() {
 
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	req.Header.Set("accept-language", "en-US,en;q=0.9")
 	req.Header.Set("x-youtube-client-version", "2.20190109")
 	req.Header.Set("x-youtube-client-name", "1")
 	resp, err := http.DefaultTransport.RoundTrip(req)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	op, _ := jq.Parse(".[1].response.contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents.[0].itemSectionRenderer.contents")
 	value, err := op.Apply(body)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	contents := []struct {
@@ -62,13 +58,25 @@ func main() {
 	}{}
 	err = json.Unmarshal(value, &contents)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	videoIDs := []string{}
 	for _, c := range contents {
 		if c.VideoRenderer.VideoID != "" {
 			videoIDs = append(videoIDs, c.VideoRenderer.VideoID)
 		}
+	}
+	return videoIDs, nil
+}
+
+func main() {
+	var n = flag.Int("n", 1, "max number of ids to return")
+	flag.Parse()
+	query := strings.Join(flag.Args(), " ")
+
+	videoIDs, err := search(query)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	for i, videoID := range videoIDs {
