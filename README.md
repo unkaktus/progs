@@ -20,6 +20,7 @@ but why?
 | `getsignal` | fetch latest Signal APK |
 | `goplay` | run a local .go file in Go Playground |
 | `helmsettag` | finds a Helm release by name and sets its image tag to the desired one |
+| `here` | run HTTP service to transfer links from mobile devices via QR codes and LAN |
 | `kubecred` | simplified certificate signing process on Kubernetes cluster |
 | `kubectx` | makes kubectl context switching faster |
 | `kubewrap` | wraps CLI tools to make them connect to Kubernetes pods directly: ```kubewrap curl nginx-6lapfe/healthz``` |
