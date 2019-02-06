@@ -14,6 +14,7 @@ but why?
 | `bundle` | builds Go application, puts it into Docker image, and pushes it to the registry |
 | `chrome-tmp` | starts chrome in Incognito mode with ephemeral profile |
 | `dockmach` | run `docker` via docker-machine without configuring envrironment for each terminal |
+| `egressip` | learn egress IP address |
 | `fixtime` | crudely and periodically overwrite system clock with RTC data |
 | `frontprobe` | quickly probe domain fronting availability |
 | `getsignal` | fetch latest Signal APK |
