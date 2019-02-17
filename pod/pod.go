@@ -1,7 +1,7 @@
-// nodepod.go - get name of pod on specific node and/or prefix name.
+// pod.go - get name of pod on specific node and/or prefix name.
 //
 // To the extent possible under law, Ivan Markin waived all copyright
-// and related or neighboring rights to this module of nodepod, using the creative
+// and related or neighboring rights to this module of progs, using the creative
 // commons "CC0" public domain dedication. See LICENSE or
 // <http://creativecommons.org/publicdomain/zero/1.0/> for full details.
 
@@ -21,8 +21,8 @@ func init() {
 
 func main() {
 	var nodename = flag.String("n", "", "node name")
-	var podprefix = flag.String("p", "", "pod prefix")
 	flag.Parse()
+	podprefix := strings.Join(flag.Args(), "")
 
 	var template string
 	if *nodename == "" {
@@ -37,7 +37,7 @@ func main() {
 	pods := strings.Split(strings.TrimRight(string(out), "\n "), " ")
 
 	for _, pod := range pods {
-		if strings.HasPrefix(pod, *podprefix) {
+		if strings.HasPrefix(pod, podprefix) {
 			fmt.Printf("%s\n", pod)
 		}
 	}

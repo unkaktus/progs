@@ -25,7 +25,7 @@ but why?
 | `kubectx` | makes kubectl context switching faster |
 | `kubewrap` | wraps CLI tools to make them connect to Kubernetes pods directly: ```kubewrap curl nginx-6lapfe/healthz``` |
 | `mkremote` | adds default git remote based on current Go project location |
-| `nodepod` | looks up full Kubernetes pod name by prefix and node |
+| `pod` | looks up full Kubernetes pod names by prefix and node (prev. `nodepod`) |
 | `ppod` | fetches CPU profile and trace of Go app by podname it is running in |
 | `redir` | spins up an http server that redirects to provided url |
 | `sembump` | makes git tag semver bumping a no-brainer |
